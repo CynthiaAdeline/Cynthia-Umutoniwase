@@ -1,125 +1,57 @@
-package NurseryManagementSystem;
+package MissionManagementSystem;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Scanner scanner = new Scanner(System.in);
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
-        // Initialize classes
-        BabyClass babyClass = new BabyClass("B01");
-        MiddleClass middleClass = new MiddleClass("M01");
-        TopClass topClass = new TopClass("T01");
-
-        System.out.println("===== Nursery School Management System =====");
-
-        try {
-            // Input Teacher
-            String teacherId;
-            do {
-                System.out.print("Enter Teacher ID : ");
-                teacherId = scanner.nextLine();
-            } while (!teacherId.matches("[A-Za-z0-9]+"));
-
-            String teacherName;
-            do {
-                System.out.print("Enter Teacher Name : ");
-                teacherName = scanner.nextLine();
-            } while (!teacherName.matches("[A-Za-z ]+"));
-
-            String teacherRole;
-            do {
-                System.out.print("Enter Teacher Role : ");
-                teacherRole = scanner.nextLine();
-            } while (!teacherRole.matches("[A-Za-z ]+"));
-
-            Teacher teacher = new Teacher(teacherId, teacherName, teacherRole);
-
-            // Assign Teacher to Class
-            System.out.println("Assign teacher to class: (1) Baby (2) Middle (3) Top");
-            String classChoice = scanner.nextLine();
-
-            switch (classChoice) {
-                case "1":
-                    babyClass.assignTeacher(teacher);
-                    break;
-                case "2":
-                    middleClass.assignTeacher(teacher);
-                    break;
-                case "3":
-                    topClass.assignTeacher(teacher);
-                    break;
-                default:
-                    System.out.println("Invalid class choice.");
-                    return;
-            }
-
-            System.out.println("Teacher assigned successfully!");
-
-            // Input Student
-            String studentId;
-            do {
-                System.out.print("Enter Student ID : ");
-                studentId = scanner.nextLine();
-            } while (!studentId.matches("[A-Za-z0-9]+"));
-
-            String studentName;
-            do {
-                System.out.print("Enter Student Name : ");
-                studentName = scanner.nextLine();
-            } while (!studentName.matches("[A-Za-z ]+"));
-
-            int age;
-            while (true) {
-                System.out.print("Enter Student Age (2 to 5: ");
-                String ageInput = scanner.nextLine();
-                if (ageInput.matches("[0-9]+")) {
-                    age = Integer.parseInt(ageInput);
-                    if (age >= 2 && age <= 5) break;
-                }
-                System.out.println("Invalid age. Must be a number between 2 and 5.");
-            }
-
-            String guardianName;
-            do {
-                System.out.print("Enter Guardian Name : ");
-                guardianName = scanner.nextLine();
-            } while (!guardianName.matches("[A-Za-z ]+"));
-
-            Student student = new Student(studentId, studentName, age, guardianName);
-
-            // Enroll Student in Correct Class Based on Age
-            if (age >= 2 && age <= 3) {
-                babyClass.enrollStudent(student);
-                System.out.println("Student enrolled in Baby Class.");
-            } else if (age == 4) {
-                middleClass.enrollStudent(student);
-                System.out.println("Student enrolled in Middle Class.");
-            } else {
-                topClass.enrollStudent(student);
-                System.out.println("Student enrolled in Top Class.");
-            }
-
-            // Conduct an Activity
-            System.out.print("Enter an activity to conduct: ");
-            String activity = scanner.nextLine();
-
-            if (student.registeredClass instanceof BabyClass) {
-                babyClass.conductActivity(activity);
-                babyClass.generateClassReport();
-            } else if (student.registeredClass instanceof MiddleClass) {
-                middleClass.conductActivity(activity);
-                middleClass.generateClassReport();
-            } else if (student.registeredClass instanceof TopClass) {
-                topClass.conductActivity(activity);
-                topClass.generateClassReport();
-            }
-
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+        System.out.print("Enter Mission ID : ");
+        String missionId = scanner.nextLine();
+        while (!missionId.matches("\\d+")) {
+            System.out.print("Invalid! Enter numeric Mission ID: ");
+            missionId = scanner.nextLine();
         }
+
+        System.out.print("Enter Mission Name : ");
+        String missionName = scanner.nextLine();
+        while (!missionName.matches("[a-zA-Z ]+")) {
+            System.out.print("Invalid! Enter alphabetic Mission Name: ");
+            missionName = scanner.nextLine();
+        }
+
+        System.out.print("Enter Start Date (yyyy-MM-dd): ");
+        Date startDate = df.parse(scanner.nextLine());
+
+        System.out.print("Enter End Date (yyyy-MM-dd): ");
+        Date endDate = df.parse(scanner.nextLine());
+
+        System.out.print("Enter Status (PLANNED/IN_PROGRESS/COMPLETED): ");
+        String status = scanner.nextLine();
+
+        // Sample personnel and resources
+        Personnel p1 = new Personnel("P1", "Alice", "Medic");
+        Personnel p2 = new Personnel("P2", "Bob", "Soldier");
+        Resource r1 = new Resource("R1", "Drone", 3, "Equipment");
+
+        Mission mission = new RescueMission(missionId, missionName, startDate, endDate, status);
+        mission.addPersonnel(p1);
+        mission.addPersonnel(p2);
+
+        List<Resource> resources = new ArrayList<>();
+        resources.add(r1);
+
+        if (!mission.validateDates()) {
+            System.out.println("Error: Start date must be before end date.");
+            return;
+        }
+
+        mission.assignTask();
+        mission.allocateResources(resources);
+        mission.trackMissionProgress();
+        mission.generateMissionReport();
     }
 }
-
-
 
