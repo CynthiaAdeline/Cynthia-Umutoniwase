@@ -1,123 +1,125 @@
-package LandManagementSystem;
+package NurseryManagementSystem;
 
-import java.time.LocalDate;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        // Validate Land ID (digits only)
-        String landId;
-        while (true) {
-            System.out.print("Enter Land ID : ");
-            landId = scanner.nextLine();
-            if (landId.matches("\\d+")) break;
-            System.out.println("Invalid Land ID. It must contain only digits.");
-        }
+        // Initialize classes
+        BabyClass babyClass = new BabyClass("B01");
+        MiddleClass middleClass = new MiddleClass("M01");
+        TopClass topClass = new TopClass("T01");
 
-        // Validate Owner Name (letters only)
-        String ownerName;
-        while (true) {
-            System.out.print("Enter Owner Name : ");
-            ownerName = scanner.nextLine();
-            if (ownerName.matches("[A-Za-z ]+")) break;
-            System.out.println("Invalid Owner Name. It must contain only letters.");
-        }
+        System.out.println("===== Nursery School Management System =====");
 
-        // Validate Location (no digits)
-        String location;
-        while (true) {
-            System.out.print("Enter Location : ");
-            location = scanner.nextLine();
-            if (!location.matches(".*\\d.*")) break;
-            System.out.println("Invalid Location. It must not contain digits.");
-        }
+        try {
+            // Input Teacher
+            String teacherId;
+            do {
+                System.out.print("Enter Teacher ID : ");
+                teacherId = scanner.nextLine();
+            } while (!teacherId.matches("[A-Za-z0-9]+"));
 
-        // Validate Size in Acres (positive number)
-        double sizeInAcres;
-        while (true) {
-            System.out.print("Enter Size in Acres : ");
-            String input = scanner.nextLine();
-            try {
-                sizeInAcres = Double.parseDouble(input);
-                if (sizeInAcres <= 0) throw new NumberFormatException();
-                break;
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a positive number for size.");
+            String teacherName;
+            do {
+                System.out.print("Enter Teacher Name : ");
+                teacherName = scanner.nextLine();
+            } while (!teacherName.matches("[A-Za-z ]+"));
+
+            String teacherRole;
+            do {
+                System.out.print("Enter Teacher Role : ");
+                teacherRole = scanner.nextLine();
+            } while (!teacherRole.matches("[A-Za-z ]+"));
+
+            Teacher teacher = new Teacher(teacherId, teacherName, teacherRole);
+
+            // Assign Teacher to Class
+            System.out.println("Assign teacher to class: (1) Baby (2) Middle (3) Top");
+            String classChoice = scanner.nextLine();
+
+            switch (classChoice) {
+                case "1":
+                    babyClass.assignTeacher(teacher);
+                    break;
+                case "2":
+                    middleClass.assignTeacher(teacher);
+                    break;
+                case "3":
+                    topClass.assignTeacher(teacher);
+                    break;
+                default:
+                    System.out.println("Invalid class choice.");
+                    return;
             }
-        }
 
-        // Validate Land Type (must match one of the subclasses)
-        String landType;
-        while (true) {
-            System.out.print("Enter Land Type (Agricultural, Residential, Commercial, Industrial): ");
-            landType = scanner.nextLine();
-            if (landType.matches("(?i)Agricultural|Residential|Commercial|Industrial")) break;
-            System.out.println("Invalid land type. Please enter one of the specified types.");
-        }
+            System.out.println("Teacher assigned successfully!");
 
-        // Determine which subclass to instantiate
-        Land land = null;
-        LocalDate today = LocalDate.now();
-        String typeLower = landType.toLowerCase();
+            // Input Student
+            String studentId;
+            do {
+                System.out.print("Enter Student ID : ");
+                studentId = scanner.nextLine();
+            } while (!studentId.matches("[A-Za-z0-9]+"));
 
-        switch (typeLower) {
-            case "agricultural":
-                land = new AgriculturalLand(landId, ownerName, location, sizeInAcres, today);
-                break;
-            case "residential":
-                // For residential, ask number of units
-                int units = 0;
-                while (true) {
-                    System.out.print("Enter number of units on the land (up to 2 per acre): ");
-                    String in = scanner.nextLine();
-                    try {
-                        units = Integer.parseInt(in);
-                        if (units < 0) throw new NumberFormatException();
-                        break;
-                    } catch (NumberFormatException e) {
-                        System.out.println("Invalid number of units. It must be a non-negative integer.");
-                    }
+            String studentName;
+            do {
+                System.out.print("Enter Student Name : ");
+                studentName = scanner.nextLine();
+            } while (!studentName.matches("[A-Za-z ]+"));
+
+            int age;
+            while (true) {
+                System.out.print("Enter Student Age (2 to 5: ");
+                String ageInput = scanner.nextLine();
+                if (ageInput.matches("[0-9]+")) {
+                    age = Integer.parseInt(ageInput);
+                    if (age >= 2 && age <= 5) break;
                 }
-                land = new ResidentialLand(landId, ownerName, location, sizeInAcres, today, units);
-                break;
-            case "commercial":
-                // For commercial, ask if in commercial zone
-                boolean inZone = false;
-                while (true) {
-                    System.out.print("Is the land in a commercial zone? (yes/no): ");
-                    String in = scanner.nextLine();
-                    if (in.equalsIgnoreCase("yes")) {
-                        inZone = true;
-                        break;
-                    }
-                    if (in.equalsIgnoreCase("no")) {
-                        inZone = false;
-                        break;
-                    }
-                    System.out.println("Invalid input. Please enter yes or no.");
-                }
-                land = new CommercialLand(landId, ownerName, location, sizeInAcres, today, inZone);
-                break;
-            case "industrial":
-                // For industrial, ask for environmental clearance
-                boolean clearance = false;
-                while (true) {
-                    System.out.print("Has environmental clearance been obtained? (yes/no): ");
-                    String in = scanner.nextLine();
-                    if (in.equalsIgnoreCase("yes")) {
-                        clearance = true;
-                        break;
-                    }
-                    if (in.equalsIgnoreCase("no")) {
-                        clearance = false;
-                        break;
-                    }
-                    System.out.println("Invalid input. Please enter yes or no.");
-                }
-                land = new IndustrialLand(landId, ownerName, location, sizeInAcres, today, clearance);
-                break;
+                System.out.println("Invalid age. Must be a number between 2 and 5.");
+            }
+
+            String guardianName;
+            do {
+                System.out.print("Enter Guardian Name : ");
+                guardianName = scanner.nextLine();
+            } while (!guardianName.matches("[A-Za-z ]+"));
+
+            Student student = new Student(studentId, studentName, age, guardianName);
+
+            // Enroll Student in Correct Class Based on Age
+            if (age >= 2 && age <= 3) {
+                babyClass.enrollStudent(student);
+                System.out.println("Student enrolled in Baby Class.");
+            } else if (age == 4) {
+                middleClass.enrollStudent(student);
+                System.out.println("Student enrolled in Middle Class.");
+            } else {
+                topClass.enrollStudent(student);
+                System.out.println("Student enrolled in Top Class.");
+            }
+
+            // Conduct an Activity
+            System.out.print("Enter an activity to conduct: ");
+            String activity = scanner.nextLine();
+
+            if (student.registeredClass instanceof BabyClass) {
+                babyClass.conductActivity(activity);
+                babyClass.generateClassReport();
+            } else if (student.registeredClass instanceof MiddleClass) {
+                middleClass.conductActivity(activity);
+                middleClass.generateClassReport();
+            } else if (student.registeredClass instanceof TopClass) {
+                topClass.conductActivity(activity);
+                topClass.generateClassReport();
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 }
+
+
+
